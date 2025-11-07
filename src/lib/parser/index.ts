@@ -1,4 +1,5 @@
 import * as fs from 'node:fs'
+
 import type {
   AmbiguityRow,
   ContextRow,
@@ -16,7 +17,7 @@ import type {
  * Parse a .tql file into a JSON structure
  */
 export function parseTql(filePath: string): TqlDocument {
-  const content = fs.readFileSync(filePath, 'utf-8')
+  const content = fs.readFileSync(filePath, 'utf8')
   const lines = content.split('\n')
 
   const doc: TqlDocument = {
@@ -31,13 +32,13 @@ export function parseTql(filePath: string): TqlDocument {
     tasks: {rows: []},
   }
 
-  let currentFacet: string | null = null
+  let currentFacet: null | string = null
   let currentHeaders: string[] = []
   let inDataSection = false
   let headerParsed = false
 
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i].trim()
+  for (const line_ of lines) {
+    const line = line_.trim()
 
     // Detect end of table section (empty line after table)
     if (line === '' && currentHeaders.length > 0) {
@@ -60,7 +61,7 @@ export function parseTql(filePath: string): TqlDocument {
     if (!line || !currentFacet) continue
 
     // Skip separator rows
-    if (line.match(/^\|[-\s|]+\|$/)) {
+    if (/^\|[-\s|]+\|$/.test(line)) {
       headerParsed = true // After separator, we know header is done
       continue
     }
@@ -68,7 +69,7 @@ export function parseTql(filePath: string): TqlDocument {
     // Parse table header row
     if (inDataSection && line.startsWith('|') && !headerParsed) {
       const cells = parseTableRow(line)
-      if (cells.length > 0 && !currentHeaders.length) {
+      if (cells.length > 0 && currentHeaders.length === 0) {
         // This is the header row
         currentHeaders = cells
         continue
@@ -80,39 +81,56 @@ export function parseTql(filePath: string): TqlDocument {
       const cells = parseTableRow(line)
 
       const row: Record<string, string> = {}
-      for (let j = 0; j < currentHeaders.length; j++) {
-        row[currentHeaders[j]] = cells[j] || ''
+      for (const [j, currentHeader] of currentHeaders.entries()) {
+        row[currentHeader] = cells[j] || ''
       }
 
       // Add to appropriate facet
       switch (currentFacet) {
-        case 'data':
-          doc.data.rows.push(row as unknown as DataRow)
-          break
-        case 'meaning':
-          doc.meaning.rows.push(row as unknown as MeaningRow)
-          break
-        case 'structure':
-          doc.structure.rows.push(row as unknown as StructureRow)
-          break
-        case 'ambiguity':
+        case 'ambiguity': {
           doc.ambiguity.rows.push(row as unknown as AmbiguityRow)
           break
-        case 'intent':
-          doc.intent.rows.push(row as unknown as IntentRow)
-          break
-        case 'context':
+        }
+
+        case 'context': {
           doc.context.rows.push(row as unknown as ContextRow)
           break
-        case 'query':
+        }
+
+        case 'data': {
+          doc.data.rows.push(row as unknown as DataRow)
+          break
+        }
+
+        case 'intent': {
+          doc.intent.rows.push(row as unknown as IntentRow)
+          break
+        }
+
+        case 'meaning': {
+          doc.meaning.rows.push(row as unknown as MeaningRow)
+          break
+        }
+
+        case 'query': {
           doc.query.rows.push(row as unknown as QueryRow)
           break
-        case 'tasks':
-          doc.tasks.rows.push(row as unknown as TasksRow)
-          break
-        case 'score':
+        }
+
+        case 'score': {
           doc.score.rows.push(row as unknown as ScoreRow)
           break
+        }
+
+        case 'structure': {
+          doc.structure.rows.push(row as unknown as StructureRow)
+          break
+        }
+
+        case 'tasks': {
+          doc.tasks.rows.push(row as unknown as TasksRow)
+          break
+        }
       }
     }
   }
@@ -134,5 +152,5 @@ function parseTableRow(line: string): string[] {
  * Export TQL document to JSON file (optional, for debugging)
  */
 export function writeTqlJson(filePath: string, doc: TqlDocument): void {
-  fs.writeFileSync(filePath, JSON.stringify(doc, null, 2), 'utf-8')
+  fs.writeFileSync(filePath, JSON.stringify(doc, null, 2), 'utf8')
 }

@@ -1,6 +1,6 @@
 // Quick test of the TQL parser
+import { writeTql } from './dist/lib/parser/generator.js'
 import { parseTql, writeTqlJson } from './dist/lib/parser/index.js'
-import { generateTqlFromJson, writeTql } from './dist/lib/parser/generator.js'
 
 // Parse the TQL file
 console.log('Parsing examples/stablecoin.tql...')

@@ -1,0 +1,3 @@
+# Test scripts (not part of the package)
+test-parser.js
+test-as-library.js

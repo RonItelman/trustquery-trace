@@ -6,7 +6,7 @@ export interface CsvData {
 }
 
 export function readCsv(filePath: string): CsvData {
-  const content = fs.readFileSync(filePath, 'utf-8')
+  const content = fs.readFileSync(filePath, 'utf8')
   const parsedRows = parseCsv(content)
 
   if (parsedRows.length === 0) {
@@ -28,8 +28,7 @@ function parseCsv(content: string): string[][] {
     let current = ''
     let inQuotes = false
 
-    for (let i = 0; i < line.length; i++) {
-      const char = line[i]
+    for (const char of line) {
 
       if (char === '"') {
         inQuotes = !inQuotes

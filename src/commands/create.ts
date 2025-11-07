@@ -1,13 +1,13 @@
 import {Command, Flags} from '@oclif/core'
 import * as fs from 'node:fs'
-import * as path from 'node:path'
-import {readCsv} from '../lib/readers/csv.js'
+import {basename, dirname, extname, join} from 'node:path'
+
 import {generateTql} from '../lib/generators/index.js'
+import {readCsv} from '../lib/readers/csv.js'
 
 export default class Create extends Command {
   static description = 'Create a TQL file from a data source'
-
-  static examples = [
+static examples = [
     `<%= config.bin %> <%= command.id %> --source csv --in data.csv
 Creating TQL file from data.csv...
 ✓ Created data.tql with 9 facets (@data, @meaning, @structure, @ambiguity, @intent, @context, @query, @tasks, @score)`,
@@ -15,8 +15,7 @@ Creating TQL file from data.csv...
 Creating TQL file from data.csv...
 ✓ Created custom.tql with 9 facets (@data, @meaning, @structure, @ambiguity, @intent, @context, @query, @tasks, @score)`,
   ]
-
-  static flags = {
+static flags = {
     facets: Flags.string({
       description: 'Comma-separated list of facets to generate (data,meaning,structure,ambiguity,intent,context,query,tasks,score)',
       required: false,
@@ -51,7 +50,7 @@ Creating TQL file from data.csv...
 
       // Parse facets flag
       const facets = facetsFlag
-        ? (facetsFlag.split(',').map((f) => f.trim()) as ('data' | 'meaning' | 'structure' | 'ambiguity' | 'intent' | 'context' | 'query' | 'tasks' | 'score')[])
+        ? (facetsFlag.split(',').map((f) => f.trim()) as ('ambiguity' | 'context' | 'data' | 'intent' | 'meaning' | 'query' | 'score' | 'structure' | 'tasks')[])
         : undefined
 
       // Generate TQL content
@@ -67,7 +66,7 @@ Creating TQL file from data.csv...
       const output = outputPath || this.getDefaultOutputPath(inputPath)
 
       // Write to file
-      fs.writeFileSync(output, tqlContent, 'utf-8')
+      fs.writeFileSync(output, tqlContent, 'utf8')
 
       const facetList = facets || ['data', 'meaning', 'structure', 'ambiguity', 'intent', 'context', 'query', 'tasks', 'score']
       const facetNames = facetList.map((f) => `@${f}`).join(', ')
@@ -86,8 +85,8 @@ Creating TQL file from data.csv...
   }
 
   private getDefaultOutputPath(inputPath: string): string {
-    const dir = path.dirname(inputPath)
-    const basename = path.basename(inputPath, path.extname(inputPath))
-    return path.join(dir, `${basename}.tql`)
+    const dir = dirname(inputPath)
+    const base = basename(inputPath, extname(inputPath))
+    return join(dir, `${base}.tql`)
   }
 }

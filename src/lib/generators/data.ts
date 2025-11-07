@@ -32,8 +32,7 @@ export function generateDataFacet(input: DataFacetInput): string {
   lines.push(separator)
 
   // Add data rows
-  for (let i = 0; i < rows.length; i++) {
-    const row = rows[i]
+  for (const [i, row] of rows.entries()) {
     const indexCell = (i + 1).toString().padEnd(indexWidth)
     const dataCells = row.map((cell, j) => (cell || '').padEnd(colWidths[j + 1])).join(' | ')
     const dataRow = '| ' + indexCell + ' | ' + dataCells + ' |'

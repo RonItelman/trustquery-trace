@@ -1,15 +1,15 @@
 // Type definitions for TQL document structure
 
 export interface TqlDocument {
-  data: DataFacet
-  meaning: MeaningFacet
-  structure: StructureFacet
   ambiguity: AmbiguityFacet
-  intent: IntentFacet
   context: ContextFacet
+  data: DataFacet
+  intent: IntentFacet
+  meaning: MeaningFacet
   query: QueryFacet
-  tasks: TasksFacet
   score: ScoreFacet
+  structure: StructureFacet
+  tasks: TasksFacet
 }
 
 export interface DataFacet {
@@ -17,8 +17,8 @@ export interface DataFacet {
 }
 
 export interface DataRow {
+  [key: string]: number | string  // Dynamic columns from CSV
   index: number
-  [key: string]: string | number  // Dynamic columns from CSV
 }
 
 export interface MeaningFacet {
@@ -26,9 +26,9 @@ export interface MeaningFacet {
 }
 
 export interface MeaningRow {
-  index: number
   column: string
   definition: string
+  index: number
   user_confirmed: string
 }
 
@@ -37,13 +37,13 @@ export interface StructureFacet {
 }
 
 export interface StructureRow {
-  index: number
   column: string
-  nullAllowed: string
   dataType: string
-  minValue: string
-  maxValue: string
   format: string
+  index: number
+  maxValue: string
+  minValue: string
+  nullAllowed: string
   user_confirmed: string
 }
 
@@ -52,10 +52,10 @@ export interface AmbiguityFacet {
 }
 
 export interface AmbiguityRow {
+  ambiguity_risk: string
+  ambiguity_type: string
   index: number
   query_trigger: string
-  ambiguity_type: string
-  ambiguity_risk: string
 }
 
 export interface IntentFacet {
@@ -63,12 +63,12 @@ export interface IntentFacet {
 }
 
 export interface IntentRow {
-  index: number
-  query_trigger: string
   clarifying_question: string
+  index: number
   options: string
-  user_response: string
+  query_trigger: string
   user_confirmed: string
+  user_response: string
 }
 
 export interface ContextFacet {
@@ -87,8 +87,8 @@ export interface QueryFacet {
 
 export interface QueryRow {
   index: number
-  user_message: string
   timestamp_utc: string
+  user_message: string
 }
 
 export interface TasksFacet {
@@ -96,10 +96,10 @@ export interface TasksFacet {
 }
 
 export interface TasksRow {
-  index: number
-  name: string
   description: string
   formula: string
+  index: number
+  name: string
 }
 
 export interface ScoreFacet {

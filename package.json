@@ -1,10 +1,10 @@
 {
-  "name": "tql-cli",
+  "name": "trustql",
   "description": "CLI for Trust Query Language",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "author": "Ron Itelman",
   "bin": {
-    "tql": "./bin/run.js"
+    "tql": "bin/run.js"
   },
   "bugs": "https://github.com/RonItelman/tql-cli/issues",
   "dependencies": {
@@ -39,6 +39,12 @@
   ],
   "homepage": "https://github.com/RonItelman/tql-cli",
   "keywords": [
+    "tql",
+    "trust-query-language",
+    "data-quality",
+    "ambiguity",
+    "csv",
+    "data-validation",
     "oclif"
   ],
   "license": "MIT",
@@ -59,7 +65,10 @@
       }
     }
   },
-  "repository": "RonItelman/tql-cli",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/RonItelman/tql-cli.git"
+  },
   "scripts": {
     "build": "shx rm -rf dist && tsc -b",
     "lint": "eslint",

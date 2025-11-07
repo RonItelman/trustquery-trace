@@ -16,17 +16,16 @@ export function generateScoreFacet(): string {
   const lines: string[] = []
 
   // Add prefix with row count
-  lines.push(`@score[${measures.length}]:`)
-
-  // Add header row
-  lines.push(`| ${headers[0].padEnd(indexWidth)} | ${headers[1].padEnd(measureWidth)} | ${headers[2].padEnd(valueWidth)} |`)
-
-  // Add separator row
-  lines.push(`|${'-'.repeat(indexWidth + 2)}|${'-'.repeat(measureWidth + 2)}|${'-'.repeat(valueWidth + 2)}|`)
+  lines.push(
+    `@score[${measures.length}]:`,
+    // Add header row
+    `| ${headers[0].padEnd(indexWidth)} | ${headers[1].padEnd(measureWidth)} | ${headers[2].padEnd(valueWidth)} |`,
+    // Add separator row
+    `|${'-'.repeat(indexWidth + 2)}|${'-'.repeat(measureWidth + 2)}|${'-'.repeat(valueWidth + 2)}|`
+  )
 
   // Add measure rows (with empty values)
-  for (let i = 0; i < measures.length; i++) {
-    const measure = measures[i]
+  for (const [i, measure] of measures.entries()) {
     lines.push(`| ${(i + 1).toString().padEnd(indexWidth)} | ${measure.padEnd(measureWidth)} | ${' '.repeat(valueWidth)} |`)
   }
 

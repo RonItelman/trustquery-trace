@@ -44,8 +44,7 @@ export function generateMeaningFacet(input: MeaningFacetInput): string {
   lines.push(separator)
 
   // Add data rows (one per column, with blank definition and user_confirmed)
-  for (let i = 0; i < headers.length; i++) {
-    const header = headers[i]
+  for (const [i, header] of headers.entries()) {
     const dataRow =
       '| ' +
       (i + 1).toString().padEnd(indexWidth) +

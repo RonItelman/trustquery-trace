@@ -14,7 +14,7 @@ export interface TqlGeneratorInput {
 }
 
 export interface TqlGeneratorOptions {
-  facets?: ('data' | 'meaning' | 'structure' | 'ambiguity' | 'intent' | 'context' | 'query' | 'tasks' | 'score')[]
+  facets?: ('ambiguity' | 'context' | 'data' | 'intent' | 'meaning' | 'query' | 'score' | 'structure' | 'tasks')[]
 }
 
 export function generateTql(input: TqlGeneratorInput, options: TqlGeneratorOptions = {}): string {

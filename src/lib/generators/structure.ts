@@ -4,11 +4,11 @@ export interface StructureFacetInput {
 
 interface ColumnStructure {
   column: string
-  nullAllowed: string
   dataType: string
-  minValue: string
-  maxValue: string
   format: string
+  maxValue: string
+  minValue: string
+  nullAllowed: string
   userConfirmed: string
 }
 
@@ -18,23 +18,23 @@ export function generateStructureFacet(input: StructureFacetInput): string {
   // Create structure template for each column (all fields blank except column name)
   const structures: ColumnStructure[] = headers.map((header) => ({
     column: header,
-    nullAllowed: '',
     dataType: '',
-    minValue: '',
-    maxValue: '',
     format: '',
+    maxValue: '',
+    minValue: '',
+    nullAllowed: '',
     userConfirmed: '',
   }))
 
   // Calculate column widths
   const colWidths = {
-    index: Math.max('index'.length, headers.length.toString().length),
     column: Math.max(...structures.map((s) => s.column.length), 'column'.length),
-    nullAllowed: 'nullAllowed'.length,
     dataType: 'dataType'.length,
-    minValue: 'minValue'.length,
-    maxValue: 'maxValue'.length,
     format: 'format'.length,
+    index: Math.max('index'.length, headers.length.toString().length),
+    maxValue: 'maxValue'.length,
+    minValue: 'minValue'.length,
+    nullAllowed: 'nullAllowed'.length,
     userConfirmed: 'user_confirmed'.length,
   }
 
@@ -87,8 +87,7 @@ export function generateStructureFacet(input: StructureFacetInput): string {
   lines.push(separator)
 
   // Add data rows (all fields blank except column name)
-  for (let i = 0; i < structures.length; i++) {
-    const structure = structures[i]
+  for (const [i, structure] of structures.entries()) {
     const dataRow =
       '| ' +
       (i + 1).toString().padEnd(colWidths.index) +

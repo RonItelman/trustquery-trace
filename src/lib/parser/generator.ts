@@ -1,4 +1,5 @@
 import * as fs from 'node:fs'
+
 import type {TqlDocument} from './types.js'
 
 /**
@@ -52,10 +53,11 @@ export function generateTqlFromJson(doc: TqlDocument): string {
  */
 export function writeTql(filePath: string, doc: TqlDocument): void {
   const content = generateTqlFromJson(doc)
-  fs.writeFileSync(filePath, content, 'utf-8')
+  fs.writeFileSync(filePath, content, 'utf8')
 }
 
 // Helper function to generate a table section
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function generateTable(headers: string[], rows: Record<string, any>[], rowCount: number, facetName: string): string {
   const lines: string[] = []
 

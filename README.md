@@ -176,7 +176,7 @@ CLI for Trust Query Language
 ## Installation
 
 ```bash
-npm install -g tql-cli
+npm install -g trustql
 ```
 
 ## Usage
@@ -188,6 +188,14 @@ tql create --source csv --in examples/stablecoin.csv
 ```
 
 This will generate a TQL file with 9 facets: @data, @meaning, @structure, @ambiguity, @intent, @context, @query, @tasks, @score
+
+**Use as a library:**
+```bash
+npm install trustql
+```
+```typescript
+import { readCsv, generateTql } from 'trustql'
+```
 
 ## Local Development
 
