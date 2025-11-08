@@ -4,11 +4,14 @@
 export { generateTql } from './lib/generators/index.js'
 
 export type { TqlGeneratorInput, TqlGeneratorOptions } from './lib/generators/index.js'
+// Operations
+export { insertRow, insertRows } from './lib/operations/insert.js'
+
 // Generator (JSON → TQL)
 export { generateTqlFromJson, writeTql } from './lib/parser/generator.js'
 
 // Parser (TQL → JSON)
-export { parseTql, writeTqlJson } from './lib/parser/index.js'
+export { parseTql, parseTqlFromString, writeTqlJson } from './lib/parser/index.js'
 
 // Types
 export type {

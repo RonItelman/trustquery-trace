@@ -53,25 +53,16 @@
 | 8     | status               |             |          |          |          |        |                |
 | 9     | settlement_time_mins |             |          |          |          |        |                |
 
-@ambiguity[0]:
-| index | query_trigger | ambiguity_type | ambiguity_risk |
-|-------|---------------|----------------|----------------|
+@context[2]:
+| index | key             | value |
+|-------|-----------------|-------|
+| 1     | user-timezone   | MST   |
+| 2     | system-timezone | UTC   |
 
-@intent[0]:
-| index | query_trigger | clarifying_question | options | user_response | user_confirmed |
-|-------|---------------|---------------------|---------|---------------|----------------|
-
-@context[0]:
-| index | key | value |
-|-------|-----|-------|
-
-@query[0]:
-| index | user_message | timestamp_utc |
-|-------|--------------|---------------|
-
-@tasks[0]:
-| index | name | description | formula |
-|-------|------|-------------|---------|
+@tasks[1]:
+| index | name              | description                    | formula                                |
+|-------|-------------------|--------------------------------|----------------------------------------|
+| 1     | total_transferred | Sum of all completed transfers | SUM(amount_usd WHERE status=completed) |
 
 @score[4]:
 | index | measure                   | value |

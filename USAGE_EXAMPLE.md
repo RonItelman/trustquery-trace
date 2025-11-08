@@ -16,11 +16,11 @@ npm install /path/to/tql-cli
 ## Example: CSV Drag & Drop
 
 ```typescript
-import { readCsv, generateTql } from 'trustql'
+import { readCsv, generateTql, parseTqlFromString, writeTqlJson } from 'trustql'
 import fs from 'fs'
 
 // When user drops a CSV file
-function handleCsvDrop(csvFilePath: string) {
+function handleCsvDrop(csvFilePath: string, format: 'tql' | 'json' = 'tql') {
   // 1. Read the CSV
   const csvData = readCsv(csvFilePath)
 
@@ -30,16 +30,24 @@ function handleCsvDrop(csvFilePath: string) {
     rows: csvData.rows
   })
 
-  // 3. Save to file (optional)
-  fs.writeFileSync('output.tql', tqlContent, 'utf-8')
-
-  // OR return the string for in-memory use
-  return tqlContent
+  // 3. Choose output format
+  if (format === 'json') {
+    // Convert TQL string to JSON
+    const tqlDoc = parseTqlFromString(tqlContent)
+    writeTqlJson('output.json', tqlDoc)
+    return tqlDoc
+  } else {
+    // Save as TQL
+    fs.writeFileSync('output.tql', tqlContent, 'utf-8')
+    return tqlContent
+  }
 }
 
-// Usage
-const tqlString = handleCsvDrop('./data/transactions.csv')
-console.log('Generated TQL:', tqlString)
+// Usage - TQL format
+const tqlString = handleCsvDrop('./data/transactions.csv', 'tql')
+
+// Usage - JSON format
+const tqlJson = handleCsvDrop('./data/transactions.csv', 'json')
 ```
 
 ## Example: Working with TQL in Memory
@@ -113,16 +121,70 @@ function processTql(doc: TqlDocument) {
 }
 ```
 
+## Example: Insert Rows Programmatically
+
+```typescript
+import { insertRow, insertRows } from 'trustql'
+
+// Insert a single row to @context facet
+insertRow('data.tql', 'context', {
+  key: 'user-timezone',
+  value: 'MST'
+})
+
+// Insert multiple rows at once
+insertRows('data.tql', 'tasks', [
+  {
+    name: 'total_transferred',
+    description: 'Sum of all completed transfers',
+    formula: 'SUM(amount_usd WHERE status=completed)'
+  },
+  {
+    name: 'avg_settlement',
+    description: 'Average settlement time',
+    formula: 'AVG(settlement_time_mins)'
+  }
+])
+
+// Index is auto-assigned based on current row count
+```
+
+## CLI: Create Command
+
+```bash
+# Create TQL file from CSV (default format)
+tql create --source csv --in data.csv
+
+# Create JSON file from CSV
+tql create --source csv --in data.csv --format json
+
+# Specify custom output path
+tql create --source csv --in data.csv --format json --out output.json
+```
+
+## CLI: Insert Command
+
+```bash
+# Insert using key/value flags (for @context facet)
+tql insert --file data.tql --facet context --key user-timezone --value MST
+
+# Insert using JSON data (for any facet)
+tql insert --file data.tql --facet tasks --data '{"name":"total_transferred","description":"Sum of all completed transfers","formula":"SUM(amount_usd WHERE status=completed)"}'
+```
+
 ## API Reference
 
 ### Core Functions
 
 - `readCsv(filePath: string)` - Read CSV file
-- `generateTql(input, options?)` - Generate TQL string from CSV data
+- `generateTql(input, options?)` - Generate TQL string from CSV data (in-memory)
 - `parseTql(filePath: string)` - Parse TQL file to JSON
+- `parseTqlFromString(content: string)` - Parse TQL content string to JSON (in-memory)
 - `generateTqlFromJson(doc: TqlDocument)` - Convert JSON to TQL string
-- `writeTql(filePath: string, doc: TqlDocument)` - Write TQL document to file
-- `writeTqlJson(filePath: string, doc: TqlDocument)` - Export to JSON file (debugging)
+- `writeTql(filePath: string, doc: TqlDocument)` - Write TQL document to .tql file
+- `writeTqlJson(filePath: string, doc: TqlDocument)` - Write TQL document to .json file
+- `insertRow(filePath, facet, data)` - Insert a single row into a facet
+- `insertRows(filePath, facet, dataArray)` - Insert multiple rows into a facet
 
 ### Types
 

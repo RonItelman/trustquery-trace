@@ -18,6 +18,13 @@ import type {
  */
 export function parseTql(filePath: string): TqlDocument {
   const content = fs.readFileSync(filePath, 'utf8')
+  return parseTqlFromString(content)
+}
+
+/**
+ * Parse TQL content string into a JSON structure
+ */
+export function parseTqlFromString(content: string): TqlDocument {
   const lines = content.split('\n')
 
   const doc: TqlDocument = {
