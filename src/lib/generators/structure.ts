@@ -9,7 +9,6 @@ interface ColumnStructure {
   maxValue: string
   minValue: string
   nullAllowed: string
-  userConfirmed: string
 }
 
 export function generateStructureFacet(input: StructureFacetInput): string {
@@ -23,7 +22,6 @@ export function generateStructureFacet(input: StructureFacetInput): string {
     maxValue: '',
     minValue: '',
     nullAllowed: '',
-    userConfirmed: '',
   }))
 
   // Calculate column widths
@@ -35,7 +33,6 @@ export function generateStructureFacet(input: StructureFacetInput): string {
     maxValue: 'maxValue'.length,
     minValue: 'minValue'.length,
     nullAllowed: 'nullAllowed'.length,
-    userConfirmed: 'user_confirmed'.length,
   }
 
   // Build the table
@@ -60,8 +57,6 @@ export function generateStructureFacet(input: StructureFacetInput): string {
     'maxValue'.padEnd(colWidths.maxValue) +
     ' | ' +
     'format'.padEnd(colWidths.format) +
-    ' | ' +
-    'user_confirmed'.padEnd(colWidths.userConfirmed) +
     ' |'
   lines.push(headerRow)
 
@@ -81,8 +76,6 @@ export function generateStructureFacet(input: StructureFacetInput): string {
     '-'.repeat(colWidths.maxValue + 2) +
     '|' +
     '-'.repeat(colWidths.format + 2) +
-    '|' +
-    '-'.repeat(colWidths.userConfirmed + 2) +
     '|'
   lines.push(separator)
 
@@ -103,8 +96,6 @@ export function generateStructureFacet(input: StructureFacetInput): string {
       structure.maxValue.padEnd(colWidths.maxValue) +
       ' | ' +
       structure.format.padEnd(colWidths.format) +
-      ' | ' +
-      structure.userConfirmed.padEnd(colWidths.userConfirmed) +
       ' |'
     lines.push(dataRow)
   }

@@ -20,7 +20,7 @@ static examples = [
   ]
 static flags = {
     facets: Flags.string({
-      description: 'Comma-separated list of facets to generate (data,meaning,structure,ambiguity,intent,context,query,tasks,score)',
+      description: 'Comma-separated list of facets to generate (table,meaning,structure,ambiguity,intent,context,query,tasks,score)',
       required: false,
     }),
     format: Flags.string({
@@ -59,7 +59,7 @@ static flags = {
 
       // Parse facets flag
       const facets = facetsFlag
-        ? (facetsFlag.split(',').map((f) => f.trim()) as ('ambiguity' | 'context' | 'data' | 'intent' | 'meaning' | 'query' | 'score' | 'structure' | 'tasks')[])
+        ? (facetsFlag.split(',').map((f) => f.trim()) as ('ambiguity' | 'context' | 'intent' | 'meaning' | 'query' | 'score' | 'structure' | 'table' | 'tasks')[])
         : undefined
 
       // Generate TQL content (always generate TQL first)
@@ -74,7 +74,7 @@ static flags = {
       // Determine format (default to tql)
       const outputFormat = format || 'tql'
 
-      const facetList = facets || ['data', 'meaning', 'structure', 'ambiguity', 'intent', 'context', 'query', 'tasks', 'score']
+      const facetList = facets || ['table', 'meaning', 'structure', 'ambiguity', 'intent', 'context', 'query', 'tasks', 'score']
       const facetNames = facetList.map((f) => `@${f}`).join(', ')
 
       // Check if output is stdout
@@ -133,7 +133,7 @@ static flags = {
 
       // Parse facets flag
       const facets = facetsFlag
-        ? (facetsFlag.split(',').map((f) => f.trim()) as ('ambiguity' | 'context' | 'data' | 'intent' | 'meaning' | 'query' | 'score' | 'structure' | 'tasks')[])
+        ? (facetsFlag.split(',').map((f) => f.trim()) as ('ambiguity' | 'context' | 'intent' | 'meaning' | 'query' | 'score' | 'structure' | 'table' | 'tasks')[])
         : undefined
 
       // Generate TQL content
@@ -148,7 +148,7 @@ static flags = {
       // Determine format (default to tql)
       const outputFormat = format || 'tql'
 
-      const facetList = facets || ['data', 'meaning', 'structure', 'ambiguity', 'intent', 'context', 'query', 'tasks', 'score']
+      const facetList = facets || ['table', 'meaning', 'structure', 'ambiguity', 'intent', 'context', 'query', 'tasks', 'score']
       const facetNames = facetList.map((f) => `@${f}`).join(', ')
 
       // Check if output is stdout

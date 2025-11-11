@@ -1,12 +1,12 @@
 import type {
   AmbiguityRow,
   ContextRow,
-  DataRow,
   IntentRow,
   MeaningRow,
   QueryRow,
   ScoreRow,
   StructureRow,
+  TableRow,
   TasksRow,
   TqlDocument,
 } from '../parser/types.js'
@@ -14,10 +14,10 @@ import type {
 import {writeTql} from '../parser/generator.js'
 import {parseTql} from '../parser/index.js'
 
-type FacetName = 'ambiguity' | 'context' | 'data' | 'intent' | 'meaning' | 'query' | 'score' | 'structure' | 'tasks'
+type FacetName = 'ambiguity' | 'context' | 'intent' | 'meaning' | 'query' | 'score' | 'structure' | 'table' | 'tasks'
 
-type FacetRowType<T extends FacetName> = T extends 'data'
-  ? DataRow
+type FacetRowType<T extends FacetName> = T extends 'table'
+  ? TableRow
   : T extends 'meaning'
     ? MeaningRow
     : T extends 'structure'

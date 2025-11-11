@@ -3,12 +3,12 @@ import * as fs from 'node:fs'
 import type {
   AmbiguityRow,
   ContextRow,
-  DataRow,
   IntentRow,
   MeaningRow,
   QueryRow,
   ScoreRow,
   StructureRow,
+  TableRow,
   TasksRow,
   TqlDocument,
 } from './types.js'
@@ -30,12 +30,12 @@ export function parseTqlFromString(content: string): TqlDocument {
   const doc: TqlDocument = {
     ambiguity: {rows: []},
     context: {rows: []},
-    data: {rows: []},
     intent: {rows: []},
     meaning: {rows: []},
     query: {rows: []},
     score: {rows: []},
     structure: {rows: []},
+    table: {rows: []},
     tasks: {rows: []},
   }
 
@@ -52,93 +52,44 @@ export function parseTqlFromString(content: string): TqlDocument {
       currentHeaders = []
       inDataSection = false
       headerParsed = false
-    }
-
-    // Detect facet headers (e.g., @data[25]:)
-    const facetMatch = line.match(/^@(\w+)\[\d+\]:/)
-    if (facetMatch) {
-      currentFacet = facetMatch[1]
-      inDataSection = true
-      headerParsed = false
-      currentHeaders = [] // Reset headers for new facet
       continue
     }
 
-    // Skip empty lines
+    // Detect facet headers (e.g., @table[25]:)
+    const facetName = parseFacetHeader(line)
+    if (facetName) {
+      currentFacet = facetName
+      inDataSection = true
+      headerParsed = false
+      currentHeaders = []
+      continue
+    }
+
+    // Skip empty lines or lines without a current facet
     if (!line || !currentFacet) continue
 
-    // Skip separator rows
-    if (/^\|[-\s|]+\|$/.test(line)) {
-      headerParsed = true // After separator, we know header is done
+    // Skip separator rows (mark header as parsed)
+    if (isSeparatorRow(line)) {
+      headerParsed = true
       continue
     }
 
     // Parse table header row
-    if (inDataSection && line.startsWith('|') && !headerParsed) {
-      const cells = parseTableRow(line)
-      if (cells.length > 0 && currentHeaders.length === 0) {
-        // This is the header row
-        currentHeaders = cells
-        continue
-      }
+    if (inDataSection && isTableRow(line) && !headerParsed && currentHeaders.length === 0) {
+      currentHeaders = parseTableRow(line)
+      continue
     }
 
     // Parse data rows (only after header is parsed)
-    if (inDataSection && headerParsed && line.startsWith('|')) {
+    if (inDataSection && headerParsed && isTableRow(line)) {
       const cells = parseTableRow(line)
-
       const row: Record<string, string> = {}
+
       for (const [j, currentHeader] of currentHeaders.entries()) {
         row[currentHeader] = cells[j] || ''
       }
 
-      // Add to appropriate facet
-      switch (currentFacet) {
-        case 'ambiguity': {
-          doc.ambiguity.rows.push(row as unknown as AmbiguityRow)
-          break
-        }
-
-        case 'context': {
-          doc.context.rows.push(row as unknown as ContextRow)
-          break
-        }
-
-        case 'data': {
-          doc.data.rows.push(row as unknown as DataRow)
-          break
-        }
-
-        case 'intent': {
-          doc.intent.rows.push(row as unknown as IntentRow)
-          break
-        }
-
-        case 'meaning': {
-          doc.meaning.rows.push(row as unknown as MeaningRow)
-          break
-        }
-
-        case 'query': {
-          doc.query.rows.push(row as unknown as QueryRow)
-          break
-        }
-
-        case 'score': {
-          doc.score.rows.push(row as unknown as ScoreRow)
-          break
-        }
-
-        case 'structure': {
-          doc.structure.rows.push(row as unknown as StructureRow)
-          break
-        }
-
-        case 'tasks': {
-          doc.tasks.rows.push(row as unknown as TasksRow)
-          break
-        }
-      }
+      addRowToFacet(doc, currentFacet, row)
     }
   }
 
@@ -153,6 +104,55 @@ function parseTableRow(line: string): string[] {
   const trimmed = line.trim().slice(1, -1) // Remove first and last |
   const cells = trimmed.split('|').map((cell) => cell.trim())
   return cells
+}
+
+/**
+ * Check if a line is a markdown table separator (e.g., |---|---|)
+ */
+function isSeparatorRow(line: string): boolean {
+  return /^\|[-\s|]+\|$/.test(line)
+}
+
+/**
+ * Check if a line is a table row (starts with |)
+ */
+function isTableRow(line: string): boolean {
+  return line.startsWith('|')
+}
+
+/**
+ * Parse facet header and return facet name if found
+ * (e.g., @table[25]: returns 'table')
+ */
+function parseFacetHeader(line: string): null | string {
+  const facetMatch = line.match(/^@(\w+)\[\d+\]:/)
+  return facetMatch ? facetMatch[1] : null
+}
+
+/**
+ * Facet registry: maps facet names to functions that add rows to the document
+ * This pattern makes it easy to add new facets without modifying parser logic
+ */
+const FACET_REGISTRY: Record<string, (doc: TqlDocument, row: Record<string, string>) => void> = {
+  ambiguity: (doc, row) => doc.ambiguity.rows.push(row as unknown as AmbiguityRow),
+  context: (doc, row) => doc.context.rows.push(row as unknown as ContextRow),
+  intent: (doc, row) => doc.intent.rows.push(row as unknown as IntentRow),
+  meaning: (doc, row) => doc.meaning.rows.push(row as unknown as MeaningRow),
+  query: (doc, row) => doc.query.rows.push(row as unknown as QueryRow),
+  score: (doc, row) => doc.score.rows.push(row as unknown as ScoreRow),
+  structure: (doc, row) => doc.structure.rows.push(row as unknown as StructureRow),
+  table: (doc, row) => doc.table.rows.push(row as unknown as TableRow),
+  tasks: (doc, row) => doc.tasks.rows.push(row as unknown as TasksRow),
+}
+
+/**
+ * Add a row to the appropriate facet in the document using the registry pattern
+ */
+function addRowToFacet(doc: TqlDocument, facet: string, row: Record<string, string>): void {
+  const addRow = FACET_REGISTRY[facet]
+  if (addRow) {
+    addRow(doc, row)
+  }
 }
 
 /**

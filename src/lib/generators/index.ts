@@ -1,6 +1,9 @@
+import type {TqlDocument} from '../parser/types.js'
+
+import {parseTqlFromString} from '../parser/index.js'
 import {generateAmbiguityFacet} from './ambiguity.js'
 import {generateContextFacet} from './context.js'
-import {generateDataFacet} from './data.js'
+import {generateTableFacet} from './data.js'
 import {generateIntentFacet} from './intent.js'
 import {generateMeaningFacet} from './meaning.js'
 import {generateQueryFacet} from './query.js'
@@ -14,17 +17,17 @@ export interface TqlGeneratorInput {
 }
 
 export interface TqlGeneratorOptions {
-  facets?: ('ambiguity' | 'context' | 'data' | 'intent' | 'meaning' | 'query' | 'score' | 'structure' | 'tasks')[]
+  facets?: ('ambiguity' | 'context' | 'intent' | 'meaning' | 'query' | 'score' | 'structure' | 'table' | 'tasks')[]
 }
 
 export function generateTql(input: TqlGeneratorInput, options: TqlGeneratorOptions = {}): string {
   const {headers, rows} = input
-  const facets = options.facets || ['data', 'meaning', 'structure', 'ambiguity', 'intent', 'context', 'query', 'tasks', 'score']
+  const facets = options.facets || ['table', 'meaning', 'structure', 'ambiguity', 'intent', 'context', 'query', 'tasks', 'score']
 
   const sections: string[] = []
 
-  if (facets.includes('data')) {
-    sections.push(generateDataFacet({headers, rows}))
+  if (facets.includes('table')) {
+    sections.push(generateTableFacet({headers, rows}))
   }
 
   if (facets.includes('meaning')) {
@@ -60,4 +63,38 @@ export function generateTql(input: TqlGeneratorInput, options: TqlGeneratorOptio
   }
 
   return sections.join('\n\n')
+}
+
+// New API for generating TqlDocument objects directly
+export interface GenerateTqlDocumentInput {
+  facet: {
+    name: '@table'
+  }
+  source: {
+    data: {
+      headers: string[]
+      rows: string[][]
+    }
+    format: 'csv'
+  }
+}
+
+/**
+ * Generate a TqlDocument object from CSV data
+ * Returns a fully parsed TqlDocument (JSON) instead of a TQL string
+ *
+ * @example
+ * const doc = generateTqlDocument({
+ *   source: { format: 'csv', data: csvData },
+ *   facet: { name: '@table' }
+ * })
+ */
+export function generateTqlDocument(input: GenerateTqlDocumentInput): TqlDocument {
+  const {headers, rows} = input.source.data
+
+  // Generate TQL string with all facets
+  const tqlString = generateTql({headers, rows})
+
+  // Parse to TqlDocument object
+  return parseTqlFromString(tqlString)
 }

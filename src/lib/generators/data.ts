@@ -1,9 +1,9 @@
-export interface DataFacetInput {
+export interface TableFacetInput {
   headers: string[]
   rows: string[][]
 }
 
-export function generateDataFacet(input: DataFacetInput): string {
+export function generateTableFacet(input: TableFacetInput): string {
   const {headers, rows} = input
   const numDataRows = rows.length
 
@@ -21,7 +21,7 @@ export function generateDataFacet(input: DataFacetInput): string {
   const lines: string[] = []
 
   // Add prefix
-  lines.push(`@data[${numDataRows}]:`)
+  lines.push(`@table[${numDataRows}]:`)
 
   // Add header row
   const headerRow = '| ' + allHeaders.map((h, i) => h.padEnd(colWidths[i])).join(' | ') + ' |'

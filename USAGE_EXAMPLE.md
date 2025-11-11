@@ -220,7 +220,7 @@ tql insert --file data.tql --facet tasks --data '{"name":"total_transferred","de
 tql update --file data.tql --facet context --index 1 --data '{"value":"PST"}'
 
 # Update multiple fields
-tql update --file data.tql --facet meaning --index 2 --data '{"definition":"Updated definition","user_confirmed":"yes"}'
+tql update --file data.tql --facet meaning --index 2 --data '{"definition":"Updated definition"}'
 ```
 
 ### Delete
@@ -264,6 +264,6 @@ tql delete --file data.tql --facet context --indices 1,3,5
 
 ### Types
 
-All types exported: `TqlDocument`, `DataRow`, `MeaningRow`, `StructureRow`, etc.
+All types exported: `TqlDocument`, `TqlConversation`, `TableRow`, `MeaningRow`, `StructureRow`, etc.
 
 See `src/lib/parser/types.ts` for complete type definitions.

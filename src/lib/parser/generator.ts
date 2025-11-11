@@ -9,8 +9,8 @@ export function generateTqlFromJson(doc: TqlDocument): string {
   const sections: string[] = []
 
   // Generate each facet in logical order
-  if (doc.data.rows.length > 0) {
-    sections.push(generateDataSection(doc))
+  if (doc.table.rows.length > 0) {
+    sections.push(generateTableSection(doc))
   }
 
   if (doc.meaning.rows.length > 0) {
@@ -88,23 +88,23 @@ function generateTable(headers: string[], rows: Record<string, any>[], rowCount:
   return lines.join('\n')
 }
 
-function generateDataSection(doc: TqlDocument): string {
-  if (doc.data.rows.length === 0) return ''
+function generateTableSection(doc: TqlDocument): string {
+  if (doc.table.rows.length === 0) return ''
 
   // Get all column names from the first row (excluding index)
-  const firstRow = doc.data.rows[0]
+  const firstRow = doc.table.rows[0]
   const headers = Object.keys(firstRow)
 
-  return generateTable(headers, doc.data.rows, doc.data.rows.length, 'data')
+  return generateTable(headers, doc.table.rows, doc.table.rows.length, 'table')
 }
 
 function generateMeaningSection(doc: TqlDocument): string {
-  const headers = ['index', 'column', 'definition', 'user_confirmed']
+  const headers = ['index', 'column', 'definition']
   return generateTable(headers, doc.meaning.rows, doc.meaning.rows.length, 'meaning')
 }
 
 function generateStructureSection(doc: TqlDocument): string {
-  const headers = ['index', 'column', 'nullAllowed', 'dataType', 'minValue', 'maxValue', 'format', 'user_confirmed']
+  const headers = ['index', 'column', 'nullAllowed', 'dataType', 'minValue', 'maxValue', 'format']
   return generateTable(headers, doc.structure.rows, doc.structure.rows.length, 'structure')
 }
 

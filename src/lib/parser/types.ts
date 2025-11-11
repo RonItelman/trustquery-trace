@@ -3,20 +3,20 @@
 export interface TqlDocument {
   ambiguity: AmbiguityFacet
   context: ContextFacet
-  data: DataFacet
   intent: IntentFacet
   meaning: MeaningFacet
   query: QueryFacet
   score: ScoreFacet
   structure: StructureFacet
+  table: TableFacet
   tasks: TasksFacet
 }
 
-export interface DataFacet {
-  rows: DataRow[]
+export interface TableFacet {
+  rows: TableRow[]
 }
 
-export interface DataRow {
+export interface TableRow {
   [key: string]: number | string  // Dynamic columns from CSV
   index: number
 }
@@ -29,7 +29,6 @@ export interface MeaningRow {
   column: string
   definition: string
   index: number
-  user_confirmed: string
 }
 
 export interface StructureFacet {
@@ -44,7 +43,6 @@ export interface StructureRow {
   maxValue: string
   minValue: string
   nullAllowed: string
-  user_confirmed: string
 }
 
 export interface AmbiguityFacet {
@@ -110,4 +108,9 @@ export interface ScoreRow {
   index: number
   measure: string
   value: string
+}
+
+// Conversation type (array of TQL documents)
+export interface TqlConversation {
+  documents: TqlDocument[]
 }

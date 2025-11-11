@@ -9,7 +9,6 @@ export function generateMeaningFacet(input: MeaningFacetInput): string {
   const indexWidth = Math.max('index'.length, headers.length.toString().length)
   const columnWidth = Math.max(...headers.map((h) => h.length), 'column'.length)
   const definitionWidth = 'definition'.length
-  const userConfirmedWidth = 'user_confirmed'.length
 
   // Build the table
   const lines: string[] = []
@@ -25,8 +24,6 @@ export function generateMeaningFacet(input: MeaningFacetInput): string {
     'column'.padEnd(columnWidth) +
     ' | ' +
     'definition'.padEnd(definitionWidth) +
-    ' | ' +
-    'user_confirmed'.padEnd(userConfirmedWidth) +
     ' |'
   lines.push(headerRow)
 
@@ -38,12 +35,10 @@ export function generateMeaningFacet(input: MeaningFacetInput): string {
     '-'.repeat(columnWidth + 2) +
     '|' +
     '-'.repeat(definitionWidth + 2) +
-    '|' +
-    '-'.repeat(userConfirmedWidth + 2) +
     '|'
   lines.push(separator)
 
-  // Add data rows (one per column, with blank definition and user_confirmed)
+  // Add data rows (one per column, with blank definition)
   for (const [i, header] of headers.entries()) {
     const dataRow =
       '| ' +
@@ -52,8 +47,6 @@ export function generateMeaningFacet(input: MeaningFacetInput): string {
       header.padEnd(columnWidth) +
       ' | ' +
       ''.padEnd(definitionWidth) +
-      ' | ' +
-      ''.padEnd(userConfirmedWidth) +
       ' |'
     lines.push(dataRow)
   }

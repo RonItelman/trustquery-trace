@@ -1,9 +1,9 @@
 // Main library exports for use in other Node applications
 
 // TQL Generators
-export { generateTql } from './lib/generators/index.js'
+export { generateTql, generateTqlDocument } from './lib/generators/index.js'
 
-export type { TqlGeneratorInput, TqlGeneratorOptions } from './lib/generators/index.js'
+export type { GenerateTqlDocumentInput, TqlGeneratorInput, TqlGeneratorOptions } from './lib/generators/index.js'
 // Operations (In-Memory First-Class)
 export {
   deleteRowInMemory,
@@ -34,8 +34,6 @@ export type {
   AmbiguityRow,
   ContextFacet,
   ContextRow,
-  DataFacet,
-  DataRow,
   IntentFacet,
   IntentRow,
   MeaningFacet,
@@ -46,8 +44,11 @@ export type {
   ScoreRow,
   StructureFacet,
   StructureRow,
+  TableFacet,
+  TableRow,
   TasksFacet,
   TasksRow,
+  TqlConversation,
   TqlDocument,
 } from './lib/parser/types.js'
 
