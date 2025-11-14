@@ -22,7 +22,7 @@ By standardizing the approach of calibrating mutual understanding, this format c
 
 When a user answers a question, the working .tql document can be updated.
 
-The tql-cli tool gives developers a basic set of tools to create .tql files, parse them, update them, and convert them to other formats, like JSON.
+The TQL CLI (`@trustquery/cli`) gives developers a basic set of tools to create .tql files, parse them, update them, and convert them to other formats, like JSON.
 
 ## The Problem TQL Solves
 
@@ -200,8 +200,8 @@ import { readCsv, generateTql } from 'trustql'
 ## Local Development
 
 ```bash
-git clone https://github.com/RonItelman/tql-cli.git
-cd tql-cli
+git clone https://github.com/RonItelman/trustquery-language.git
+cd trustquery-language
 npm install
 npm run build
 npm link

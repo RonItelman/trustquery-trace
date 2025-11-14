@@ -190,32 +190,18 @@ export function formatDiffAsMarkdown(diff: TqlDiff, useColors = true): string {
 
   const sections: string[] = []
 
-  // Summary header
-  sections.push('📊 TQL DIFF\n', `Summary:`, `  • ${diff.summary.totalFacetsChanged} facets modified`, `  • ${diff.summary.totalFacetsUnchanged} facets unchanged`, `  • ${diff.summary.totalRowChanges} row changes\n`)
-
-  // Show each facet that changed
+  // Show each facet that changed (only changed facets)
   const changedFacets = diff.facets.filter((f) => f.status !== 'unchanged')
 
   if (changedFacets.length === 0) {
-    sections.push('No changes detected.\n')
+    sections.push('No changes detected.')
   } else {
-    sections.push('Changes by facet:\n')
-
     for (const facet of changedFacets) {
-      sections.push(formatFacetDiff(facet, useColors), '') // Empty line between facets
+      sections.push(formatFacetDiff(facet, useColors))
     }
   }
 
-  // Show unchanged facets summary
-  const unchangedFacets = diff.facets.filter((f) => f.status === 'unchanged')
-  if (unchangedFacets.length > 0) {
-    sections.push('Unchanged facets:')
-    for (const facet of unchangedFacets) {
-      sections.push(`  ✓ @${facet.facetName} (${facet.rowsBefore} rows)`)
-    }
-  }
-
-  return sections.join('\n')
+  return sections.join('\n\n')
 }
 
 /**
@@ -224,7 +210,8 @@ export function formatDiffAsMarkdown(diff: TqlDiff, useColors = true): string {
 function formatFacetDiff(facet: FacetDiff, useColors: boolean): string {
   const lines: string[] = []
 
-  lines.push(`@${facet.facetName} (${facet.status})`, `  • ${facet.changes.length} changes`)
+  // Use @facet[n] syntax where n is number of changes
+  lines.push(`@${facet.facetName}[${facet.changes.length}]:`)
 
   if (facet.changes.length === 0) {
     return lines.join('\n')

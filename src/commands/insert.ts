@@ -1,6 +1,9 @@
 import {Command, Flags} from '@oclif/core'
 
-import {insertRow} from '../lib/operations/crud.js'
+import {applyChangesToConversation, insertRowInMemory} from '../lib/operations/crud.js'
+import {parseTql} from '../lib/parser/index.js'
+import {writeTql} from '../lib/parser/generator.js'
+import {getDocumentCount} from '../lib/parser/types.js'
 
 export default class Insert extends Command {
   static description = 'Insert a row into a TQL file facet'
@@ -69,11 +72,21 @@ static flags = {
         this.error('Must provide either --data or (--key and --value for context facet)')
       }
 
-      // Insert the row
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      insertRow(flags.file, flags.facet as any, rowData as any)
+      // Read conversation, apply changes, and write back with diff
+      const conversation = parseTql(flags.file)
+      const docCountBefore = getDocumentCount(conversation)
 
-      this.log(`✓ Inserted 1 row into @${flags.facet} in ${flags.file}`)
+      const updatedConversation = applyChangesToConversation(conversation, (doc) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        insertRowInMemory(doc, flags.facet as any, rowData as any)
+      })
+
+      writeTql(flags.file, updatedConversation)
+
+      const docCountAfter = getDocumentCount(updatedConversation)
+      this.log(`✓ Inserted 1 row into @${flags.facet}`)
+      this.log(`  Documents: ${docCountBefore} → ${docCountAfter}`)
+      this.log(`  Diff: $diff[+${docCountBefore - 1}→+${docCountAfter - 1}]`)
     } catch (error) {
       if (error instanceof Error) {
         this.error(`Failed to insert row: ${error.message}`)

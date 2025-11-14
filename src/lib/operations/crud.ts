@@ -180,11 +180,11 @@ export function updateRowInMemory<T extends FacetName>(
     throw new Error(`Row with index ${index} not found in @${facet} facet`)
   }
 
-  // Update the row (merge with existing data, preserve index)
+  // Update the row (merge with existing data, preserve original index)
   currentRows[rowIndex] = {
     ...currentRows[rowIndex],
     ...data,
-    index, // Preserve the index
+    index: currentRows[rowIndex].index, // Preserve the original index (keep exact type and value)
   } as FacetRowType<T>
 }
 

@@ -1,6 +1,9 @@
 import {Command, Flags} from '@oclif/core'
 
-import {deleteRow, deleteRows} from '../lib/operations/crud.js'
+import {applyChangesToConversation, deleteRowInMemory, deleteRowsInMemory} from '../lib/operations/crud.js'
+import {parseTql} from '../lib/parser/index.js'
+import {writeTql} from '../lib/parser/generator.js'
+import {getDocumentCount} from '../lib/parser/types.js'
 
 export default class Delete extends Command {
   static description = 'Delete row(s) from a TQL file facet'
@@ -38,11 +41,23 @@ static flags = {
     const {flags} = await this.parse(Delete)
 
     try {
+      // Read conversation
+      const conversation = parseTql(flags.file)
+      const docCountBefore = getDocumentCount(conversation)
+
       if (flags.index !== undefined) {
         // Delete single row
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        deleteRow(flags.file, flags.facet as any, flags.index)
-        this.log(`✓ Deleted 1 row from @${flags.facet} in ${flags.file}`)
+        const updatedConversation = applyChangesToConversation(conversation, (doc) => {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          deleteRowInMemory(doc, flags.facet as any, flags.index!)
+        })
+
+        writeTql(flags.file, updatedConversation)
+
+        const docCountAfter = getDocumentCount(updatedConversation)
+        this.log(`✓ Deleted @${flags.facet}[${flags.index}]`)
+        this.log(`  Documents: ${docCountBefore} → ${docCountAfter}`)
+        this.log(`  Diff: $diff[+${docCountBefore - 1}→+${docCountAfter - 1}]`)
       } else if (flags.indices) {
         // Delete multiple rows
         const indices = flags.indices.split(',').map((idx) => Number.parseInt(idx.trim(), 10))
@@ -51,9 +66,17 @@ static flags = {
           this.error('Invalid indices format. Use comma-separated numbers (e.g., "1,2,3")')
         }
 
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        deleteRows(flags.file, flags.facet as any, indices)
-        this.log(`✓ Deleted ${indices.length} rows from @${flags.facet} in ${flags.file}`)
+        const updatedConversation = applyChangesToConversation(conversation, (doc) => {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          deleteRowsInMemory(doc, flags.facet as any, indices)
+        })
+
+        writeTql(flags.file, updatedConversation)
+
+        const docCountAfter = getDocumentCount(updatedConversation)
+        this.log(`✓ Deleted ${indices.length} rows from @${flags.facet}`)
+        this.log(`  Documents: ${docCountBefore} → ${docCountAfter}`)
+        this.log(`  Diff: $diff[+${docCountBefore - 1}→+${docCountAfter - 1}]`)
       } else {
         this.error('Must provide either --index or --indices')
       }

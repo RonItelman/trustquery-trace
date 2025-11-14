@@ -1,6 +1,9 @@
 import {Command, Flags} from '@oclif/core'
 
-import {updateRow} from '../lib/operations/crud.js'
+import {applyChangesToConversation, updateRowInMemory} from '../lib/operations/crud.js'
+import {parseTql} from '../lib/parser/index.js'
+import {writeTql} from '../lib/parser/generator.js'
+import {getDocumentCount} from '../lib/parser/types.js'
 
 export default class Update extends Command {
   static description = 'Update a row in a TQL file facet'
@@ -45,11 +48,21 @@ static flags = {
         this.error('Invalid JSON in --data flag')
       }
 
-      // Update the row
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      updateRow(flags.file, flags.facet as any, flags.index, rowData as any)
+      // Read conversation, apply changes, and write back with diff
+      const conversation = parseTql(flags.file)
+      const docCountBefore = getDocumentCount(conversation)
 
-      this.log(`✓ Updated row ${flags.index} in @${flags.facet} in ${flags.file}`)
+      const updatedConversation = applyChangesToConversation(conversation, (doc) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        updateRowInMemory(doc, flags.facet as any, flags.index, rowData as any)
+      })
+
+      writeTql(flags.file, updatedConversation)
+
+      const docCountAfter = getDocumentCount(updatedConversation)
+      this.log(`✓ Updated @${flags.facet}[${flags.index}]`)
+      this.log(`  Documents: ${docCountBefore} → ${docCountAfter}`)
+      this.log(`  Diff: $diff[+${docCountBefore - 1}→+${docCountAfter - 1}]`)
     } catch (error) {
       if (error instanceof Error) {
         this.error(`Failed to update row: ${error.message}`)

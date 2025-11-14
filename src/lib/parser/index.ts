@@ -106,10 +106,159 @@ function addItemToSequence(sequence: TqlConversation['sequence'], key: string, c
     const doc = parseTqlDocumentFromString(content)
     sequence.push({[key]: doc} as any)
   } else if (key.startsWith('$diff')) {
-    // For now, skip parsing diff content (it's metadata)
-    // We could parse it later if needed
-    // sequence.push({[key]: parsedDiff} as any)
+    // Parse diff markdown content back to TqlDiff structure
+    const diff = parseDiffFromString(content)
+    sequence.push({[key]: diff} as any)
   }
+}
+
+/**
+ * Parse diff markdown content back into TqlDiff structure
+ * This reconstructs the TqlDiff object from the markdown tables
+ */
+function parseDiffFromString(content: string): any {
+  const lines = content.split('\n')
+  const facets: any[] = []
+
+  let currentFacet: string | null = null
+  let currentChanges: any[] = []
+  let inTable = false
+  let headers: string[] = []
+
+  for (const line of lines) {
+    const trimmed = line.trim()
+
+    // Match facet headers like @meaning[1]:
+    const facetMatch = trimmed.match(/^@(\w+)\[(\d+)\]:/)
+    if (facetMatch) {
+      // Save previous facet if exists
+      if (currentFacet && currentChanges.length > 0) {
+        facets.push({
+          facetName: currentFacet,
+          changes: currentChanges,
+          status: 'modified' as const,
+          rowsBefore: 0, // Not stored in markdown, placeholder
+          rowsAfter: 0,  // Not stored in markdown, placeholder
+        })
+      }
+
+      currentFacet = facetMatch[1]
+      currentChanges = []
+      inTable = false
+      continue
+    }
+
+    // Parse table header
+    if (trimmed.startsWith('|') && !inTable && !isSeparatorRow(trimmed)) {
+      headers = parseTableRow(trimmed)
+      inTable = true
+      continue
+    }
+
+    // Skip separator row
+    if (isSeparatorRow(trimmed)) {
+      continue
+    }
+
+    // Parse data rows
+    if (inTable && trimmed.startsWith('|') && currentFacet) {
+      const cells = parseTableRow(trimmed)
+      const delta = cells[0] // First column is Δ
+
+      // Build row object from headers and cells
+      const row: any = {}
+      for (let i = 1; i < headers.length; i++) {
+        row[headers[i]] = cells[i] || ''
+      }
+
+      // Determine change type based on delta symbol
+      if (delta === '+') {
+        currentChanges.push({
+          type: 'added',
+          after: row,
+          index: row.index,
+        })
+      } else if (delta === '-') {
+        currentChanges.push({
+          type: 'removed',
+          before: row,
+          index: row.index,
+        })
+      }
+    }
+  }
+
+  // Save last facet
+  if (currentFacet && currentChanges.length > 0) {
+    facets.push({
+      facetName: currentFacet,
+      changes: mergeModifiedChanges(currentChanges),
+      status: 'modified' as const,
+      rowsBefore: 0,
+      rowsAfter: 0,
+    })
+  }
+
+  return {
+    facets,
+    status: 'success',
+    summary: {
+      totalFacetsChanged: facets.length,
+      totalFacetsUnchanged: 0,
+      totalRowChanges: facets.reduce((sum: number, f: any) => sum + f.changes.length, 0),
+    },
+  }
+}
+
+/**
+ * Merge consecutive removed/added changes with same index into modified changes
+ */
+function mergeModifiedChanges(changes: any[]): any[] {
+  const merged: any[] = []
+  const indexMap = new Map<string, any>()
+
+  for (const change of changes) {
+    const idx = change.index
+
+    if (change.type === 'removed') {
+      // Check if we already have an added change for this index
+      if (indexMap.has(idx) && indexMap.get(idx).type === 'added') {
+        const added = indexMap.get(idx)
+        merged.push({
+          type: 'modified',
+          before: change.before,
+          after: added.after,
+          index: idx,
+          modifiedFields: [], // Not available from markdown
+        })
+        indexMap.delete(idx)
+      } else {
+        indexMap.set(idx, change)
+      }
+    } else if (change.type === 'added') {
+      // Check if we already have a removed change for this index
+      if (indexMap.has(idx) && indexMap.get(idx).type === 'removed') {
+        const removed = indexMap.get(idx)
+        merged.push({
+          type: 'modified',
+          before: removed.before,
+          after: change.after,
+          index: idx,
+          modifiedFields: [], // Not available from markdown
+        })
+        indexMap.delete(idx)
+      } else {
+        indexMap.set(idx, change)
+      }
+    }
+  }
+
+  // Add any remaining standalone changes
+  for (const change of indexMap.values()) {
+    merged.push(change)
+  }
+
+  return merged
 }
 
 /**
