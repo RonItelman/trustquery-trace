@@ -71,7 +71,7 @@
 @query[1]:
 | index | user_message                        | timestamp_utc            |
 |-------|-------------------------------------|--------------------------|
-| 1     | How much was transferred yesterday? | 2025-11-11T18:50:16.145Z |
+| 1     | How much was transferred yesterday? | 2025-11-14T13:40:38.882Z |
 
 @tasks[0]:
 | index | name | description | formula |
@@ -86,38 +86,18 @@
 | 4     | Missing Certainty Ratio   |       |
 
 $diff[+0→+1]:
-📊 TQL DIFF
-
-Summary:
-  • 2 facets modified
-  • 7 facets unchanged
-  • 3 row changes
-
-Changes by facet:
-
-@meaning (modified)
-  • 2 changes
+@meaning[1]:
 
 | Δ   | index | column    | definition   |
 |-----|-------|-----------|--------------|
-| +   | 2     | timestamp | ISO 8601 UTC |
 | -   | 2     | timestamp |              |
+| +   | 2     | timestamp | ISO 8601 UTC |
 
-@context (added)
-  • 1 changes
+@context[1]:
 
 | Δ   | index | key           | value |
 |-----|-------|---------------|-------|
 | +   | 1     | user_timezone | MST   |
-
-Unchanged facets:
-  ✓ @table (25 rows)
-  ✓ @structure (9 rows)
-  ✓ @ambiguity (0 rows)
-  ✓ @intent (0 rows)
-  ✓ @query (1 rows)
-  ✓ @tasks (0 rows)
-  ✓ @score (4 rows)
 
 #document[+1]:
 @table[25]:
@@ -191,7 +171,7 @@ Unchanged facets:
 @query[1]:
 | index | user_message                        | timestamp_utc            |
 |-------|-------------------------------------|--------------------------|
-| 1     | How much was transferred yesterday? | 2025-11-11T18:50:16.145Z |
+| 1     | How much was transferred yesterday? | 2025-11-14T13:40:38.882Z |
 
 @tasks[0]:
 | index | name | description | formula |
