@@ -7,10 +7,19 @@ export interface CsvData {
 
 export function readCsv(filePath: string): CsvData {
   const content = fs.readFileSync(filePath, 'utf8')
+  return parseCsvString(content)
+}
+
+/**
+ * Parse CSV string content (browser-compatible, no fs dependency)
+ * @param content - CSV string content
+ * @returns CsvData with headers and rows
+ */
+export function parseCsvString(content: string): CsvData {
   const parsedRows = parseCsv(content)
 
   if (parsedRows.length === 0) {
-    throw new Error('CSV file is empty')
+    throw new Error('CSV content is empty')
   }
 
   return {

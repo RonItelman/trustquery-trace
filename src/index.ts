@@ -70,7 +70,8 @@ export type {
 } from './lib/parser/types.js'
 
 // CSV Reader
-export { readCsv } from './lib/readers/csv.js'
+export { readCsv, parseCsvString } from './lib/readers/csv.js'
+export type { CsvData } from './lib/readers/csv.js'
 
 // CLI (for oclif)
 export { run } from '@oclif/core'

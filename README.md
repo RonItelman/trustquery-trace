@@ -1,11 +1,14 @@
-# TQL Format (Trust Query Language)
+# TrustQuery Trace
 
-## What is TQL?
-When users upload a CSV, or use a dataset, there can be ambiguity which creates risk of misunderstanding.
+> **Trace data disambiguation conversations with versioned semantic annotations**
 
-.tql format is a working document that a System, User, and LLM can all share for more precise shared understanding.
+## What is TrustQuery Trace?
 
-Using .tql allows for a methodical, standard, step-by-step process to score the range of financial and/or answers based on possible interpretations of the query and/or data that are unresolved.
+Like LangSmith traces LLM conversations, **TrustQuery traces data disambiguation**.
+
+When users work with datasets, ambiguity creates risk. "Yesterday" depends on timezone. "Sales" could mean revenue, units, or subscriptions. TrustQuery Trace captures the conversation of how ambiguous data becomes clear - with full version history.
+
+The `.tql` format is a traced conversation that Systems, Users, and LLMs can share for precise understanding. Each `TqlConversation` logs the evolution of data semantics over time, like git commits for data understanding.
 
 For any given dataset part of a conversation, a .tql file has:
 - @data: The dataset
@@ -22,16 +25,16 @@ By standardizing the approach of calibrating mutual understanding, this format c
 
 When a user answers a question, the working .tql document can be updated.
 
-The TQL CLI (`@trustquery/cli`) gives developers a basic set of tools to create .tql files, parse them, update them, and convert them to other formats, like JSON.
+The TrustQuery Trace library (`@trustquery/trace`) gives developers tools to create .tql files, parse them, update them with diffs, and convert between formats.
 
-## The Problem TQL Solves
+## The Problem TrustQuery Trace Solves
 
 When someone asks "How much money was transferred yesterday?", there are multiple valid interpretations:
 - Which timezone defines "yesterday"?
 - Are amounts in dollars or thousands of dollars?
 - Does "transferred" mean sent, received, or both?
 
-**TQL makes ambiguity explicit and resolvable.**
+**TrustQuery Trace makes ambiguity explicit, resolvable, and traceable over time.**
 
 ## File Structure
 
@@ -169,45 +172,95 @@ Computational tasks that can be performed on the data
 
 ---
 
-## TQL CLI
-
-CLI for Trust Query Language
-
 ## Installation
 
+### CLI (Global)
+
 ```bash
-npm install -g trustql
+npm install -g @trustquery/trace
+```
+
+### Library (Node.js & Browser)
+
+```bash
+npm install @trustquery/trace
 ```
 
 ## Usage
 
+### CLI
+
 Create a TQL file from a CSV data source:
 
 ```bash
-tql create --source csv --in examples/stablecoin.csv
+tql create --source csv --in examples/stablecoin.csv --out output.tql
 ```
 
-This will generate a TQL file with 9 facets: @data, @meaning, @structure, @ambiguity, @intent, @context, @query, @tasks, @score
+This generates a TQL conversation with 9 facets: @table, @meaning, @structure, @ambiguity, @intent, @context, @query, @tasks, @score
 
-**Use as a library:**
-```bash
-npm install trustql
-```
+### As a Library (Node.js)
+
 ```typescript
-import { readCsv, generateTql } from 'trustql'
+import {
+  readCsv,
+  generateTqlDocument,
+  insertRowInMemory,
+  applyChangesToConversation
+} from '@trustquery/trace'
+
+// Read CSV and generate TQL
+const csvData = readCsv('data.csv')
+const tqlDoc = generateTqlDocument({
+  source: { format: 'csv', data: csvData },
+  facet: { name: '@table' }
+})
+
+// Add metadata with automatic diff tracking
+const conversation = applyChangesToConversation(
+  { sequence: [{ '#document[+0]': tqlDoc }] },
+  (doc) => {
+    insertRowInMemory(doc, 'context', {
+      key: 'source',
+      value: 'internal-api'
+    })
+  }
+)
+
+// conversation.sequence now has:
+// [0] #document[+0] - original
+// [1] #document[+1] - with changes
+// [2] $diff[+0→+1] - what changed
 ```
+
+### As a Library (Browser/Chrome Extension)
+
+```typescript
+import {
+  parseCsvString,  // Browser-compatible!
+  generateTqlDocument
+} from '@trustquery/trace'
+
+// Parse CSV string (no fs dependency)
+const csvData = parseCsvString(csvString)
+const tqlDoc = generateTqlDocument({
+  source: { format: 'csv', data: csvData },
+  facet: { name: '@table' }
+})
+```
+
+See [BROWSER_USAGE.md](./BROWSER_USAGE.md) for full browser/Chrome extension guide.
 
 ## Local Development
 
 ```bash
-git clone https://github.com/RonItelman/trustquery-language.git
-cd trustquery-language
+git clone https://github.com/RonItelman/trustquery-trace.git
+cd trustquery-trace
 npm install
 npm run build
 npm link
 ```
 
-Then use the CLI directly:
+Then use the CLI:
 
 ```bash
 tql create --source csv --in examples/stablecoin.csv
